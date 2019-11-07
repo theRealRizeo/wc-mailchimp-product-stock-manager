@@ -247,10 +247,9 @@ class WCMCPROD_Core_Mailchimp {
 	 * 
 	 * @return bool
 	 */
-	public function update_campaign( $id, $list_id, $content ) {
-		$data 			= array(
-			'plain_text'	=> $content,
-			'recipients' 	=> array( 'list_id' => $list_id ),
+	public function update_campaign( $id,$content ) {
+		$data 	= array(
+			'plain_text' => $content,
 		);
 		$res = $this->_put( 'campaigns/' . $id . '/content', array(
 			'body' =>  $data
@@ -267,6 +266,18 @@ class WCMCPROD_Core_Mailchimp {
 	 */
 	public function send_campaign( $id ) {
 		$res = $this->_post( 'campaigns/' . $id . '/actions/send' );
+		if ( ! is_wp_error( $res ) ) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Send campaign
+	 */
+	public function delete_campaign( $id ) {
+		$res = $this->_delete( 'campaigns/' . $id . '/actions/send' );
 		if ( ! is_wp_error( $res ) ) {
 			return true;
 		} else {

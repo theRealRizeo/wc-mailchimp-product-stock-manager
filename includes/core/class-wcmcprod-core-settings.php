@@ -48,15 +48,6 @@ class WCMCPROD_Core_Settings {
     public $email_list;
 
     /**
-     * Mailchimp Campaign IDs
-     * 
-     * @since 1.0.0
-     * 
-     * @var array
-     */
-    public $campaign = array();
-
-    /**
      * Schedule to send out the email
      * 
      * @since 1.0.0
@@ -167,7 +158,6 @@ class WCMCPROD_Core_Settings {
 			'api_key'           => $this->api_key,
 			'data_center'       => $this->data_center,
             'email_list'        => $this->email_list,
-            'campaign'       	=> $this->campaign,
             'schedule'          => $this->schedule,
             'email_template'    => $this->email_template,
             'last_sent'         => $this->last_sent
@@ -236,33 +226,6 @@ class WCMCPROD_Core_Settings {
 			$this->last_sent = array();
 		}
 		$this->last_sent[ $key ] = $value;
-	}
-
-	/**
-	 * Get campaign
-	 * 
-	 * @since 1.0.0
-	 * 
-	 * @return string
-	 */
-	public function get_campaign( $key, $default = '' ) {
-		if ( !is_array( $this->campaign ) ) {
-			$this->campaign = array();
-		}
-		if ( isset( $this->campaign[ $key ] ) ) {
-			return $this->campaign[ $key ];
-		}
-		return $default;
-	}
-
-	/**
-	 * Set campaign
-	 * 
-	 * @since 1.0.0
-	 * 
-	 */
-	public function set_campaign( $key, $value = '' ) {
-		$this->campaign[ $key ] = $value;
 	}
 
 	/**

@@ -69,9 +69,12 @@ class WCMCPROD_Controller_Scheduler {
 			$next_sent_oos 		= date( 'Y-m-d', $next_sent_oos ) . ' ' . $ouf_of_stock;
 
 			$is_send 			= current_time( 'timestamp' ) > strtotime( $next_sent_stock );
+			$current_date		= date_i18n( get_option( 'date_format' ), current_time( 'timestamp' ) );
+			$out_of_stock_title	= sprintf( __( 'Products Out Of Stock - %s', 'wc-mc-product-stock-manager' ), $current_date );
+			$in_stock_title		= sprintf( __( 'Products In Stock - %s', 'wc-mc-product-stock-manager' ), $current_date );
 
-			$ouf_of_stock 		= $settings->get_campaign( 'ouf_of_stock' );
-			$in_stock 			= $settings->get_campaign( 'in_stock' );
+			$ouf_of_stock 		= $api->save_campaign( $list_id, $ouf_of_stock_title, $ouf_of_stock_title );
+			$in_stock 			= $api->save_campaign( $list_id, $in_stock_title, $in_stock_title );
 			if ( $force ) {
 				$is_send = true;
 			}
@@ -83,13 +86,14 @@ class WCMCPROD_Controller_Scheduler {
 				$products 	= $this->get_products( 'in_stock', __( 'In Stock', 'wc-mc-product-stock-manager' ) );
 				$to_send 	= $this->replace_content( __( 'In Stock', 'wc-mc-product-stock-manager' ), $products, $content );
 
-				$updated 	= $api->update_campaign( $in_stock, $list_id, $to_send );
+				$updated 	= $api->update_campaign( $in_stock, $to_send );
 				if ( $updated ) {
 					$sent 	= $api->send_campaign( $in_stock );
 					if ( $sent && !$force ) {
 						$settings->set_last_sent( 'in_stock', current_time( 'timestamp' ) );
 					}
 				}
+				$api->delete_campaign( $in_stock );
 			}
 
 			$is_send = current_time( 'timestamp' ) > strtotime( $next_sent_oos );
@@ -104,13 +108,14 @@ class WCMCPROD_Controller_Scheduler {
 				$products 	= $this->get_products( 'out_of_stock', __( 'Out Of Stock', 'wc-mc-product-stock-manager' ) );
 				$to_send 	= $this->replace_content( __( 'Out Of Stock', 'wc-mc-product-stock-manager' ), $products, $content );
 
-				$updated 	= $api->update_campaign( $ouf_of_stock, $list_id, $to_send );
+				$updated 	= $api->update_campaign( $ouf_of_stock, $to_send );
 				if ( $updated ) {
 					$sent 	= $api->send_campaign( $ouf_of_stock );
 					if ( $sent && !$force ) {
 						$settings->set_last_sent( 'ouf_of_stock', current_time( 'timestamp' ) );
 					}
 				}
+				$api->delete_campaign( $ouf_of_stock );
 				
 			}
 			$settings->save();

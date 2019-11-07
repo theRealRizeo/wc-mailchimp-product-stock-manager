@@ -95,36 +95,9 @@ class WCMCPROD_Controller_Settings {
 					<?php
 				}
 				if ( $settings->api_key ) {
-					$ouf_of_stock 	= $settings->get_campaign( 'ouf_of_stock' );
-					$in_stock 		= $settings->get_campaign( 'in_stock' );
-					if ( empty( $ouf_of_stock ) ) {
-						?>
-						<div class="notice notice-warning">
-							<p>
-								<?php
-									_e( 'Error saving out of stock campaign. Please submit the form to try again', 'wc-mc-product-stock-manager' ); 
-								?>
-							</p>
-						</div>
-						<?php
-					}
-					if ( empty( $in_stock ) ) {
-						?>
-						<div class="notice notice-warning">
-							<p>
-								<?php
-									_e( 'Error saving in stock campaign. Please submit the form to try again', 'wc-mc-product-stock-manager' ); 
-								?>
-							</p>
-						</div>
-						<?php
-					}
-
-					if ( !empty( $ouf_of_stock ) && !empty( $in_stock ) && !empty( $settings->email_list ) ) {
-						?>
-						<a href="#" class="button button-primary wc_mc_product_stock_manager_test"><?php _e( 'Send Test Emails', 'wc-mc-product-stock-manager' ); ?></a>
-						<?php
-					}
+					?>
+					<a href="#" class="button button-primary wc_mc_product_stock_manager_test"><?php _e( 'Send Test Emails', 'wc-mc-product-stock-manager' ); ?></a>
+					<?php
 				}
 			?>
 			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
@@ -307,59 +280,7 @@ class WCMCPROD_Controller_Settings {
 				if ( !empty( $list_id ) ) {
 					$create_or_update = false;
 					if ( !$settings->email_list ) {
-						$settings->email_list 	= $list_id;
-						$create_or_update 		= true;
-					}
-					if ( $settings->email_list !== $list_id ) {
-						$create_or_update = true;
-					}
-
-					if ( $create_or_update ) {
-						if ( empty( $settings->campaign ) ) {
-							$ouf_of_stock 	= $api->save_campaign( $list_id, __( 'Products Out Of Stock', 'wc-mc-product-stock-manager' ), __( 'Products Out Of Stock', 'wc-mc-product-stock-manager' ) );
-							$in_stock 		= $api->save_campaign( $list_id, __( 'Products In Stock', 'wc-mc-product-stock-manager' ), __( 'Products In Stock', 'wc-mc-product-stock-manager' ) );
-
-							if ( $ouf_of_stock ) {
-								$settings->set_campaign( 'ouf_of_stock' , $ouf_of_stock );
-							}
-							if ( $in_stock ) {
-								$settings->set_campaign( 'in_stock' , $in_stock );
-							}
-						} else {
-							$ouf_of_stock 	= $settings->get_campaign( 'ouf_of_stock' );
-							$in_stock 		= $settings->get_campaign( 'in_stock' );
-							if ( empty( $ouf_of_stock ) ) {
-								$ouf_of_stock 	= $api->save_campaign( $list_id, __( 'Products Out Of Stock', 'wc-mc-product-stock-manager' ), __( 'Products Out Of Stock', 'wc-mc-product-stock-manager' ) );
-								$settings->set_campaign( 'ouf_of_stock' , $ouf_of_stock );
-							} else {
-								$api->update_campaign( $ouf_of_stock, $list_id, $content );
-							}
-
-							if ( empty( $in_stock ) ) {
-								$in_stock 	= $api->save_campaign( $list_id, __( 'Products In Stock', 'wc-mc-product-stock-manager' ), __( 'Products In Stock', 'wc-mc-product-stock-manager' ) );
-								$settings->set_campaign( 'in_stock' , $in_stock );
-							} else {
-								$api->update_campaign( $in_stock, $list_id, $content );
-							}
-						}
-					} else {
-						$ouf_of_stock 	= $settings->get_campaign( 'ouf_of_stock' );
-						$in_stock 		= $settings->get_campaign( 'in_stock' );
-						if ( empty( $ouf_of_stock ) ) {
-							$ouf_of_stock 	= $api->save_campaign( $list_id, __( 'Products Out Of Stock', 'wc-mc-product-stock-manager' ), __( 'Products Out Of Stock', 'wc-mc-product-stock-manager' ) );
-							if ( $ouf_of_stock ) {
-								$settings->set_campaign( 'ouf_of_stock' , $ouf_of_stock );
-								$api->update_campaign( $ouf_of_stock, $list_id, $content );
-							}
-						}
-
-						if ( empty( $in_stock ) ) {
-							$in_stock 	= $api->save_campaign( $list_id, __( 'Products In Stock', 'wc-mc-product-stock-manager' ), __( 'Products In Stock', 'wc-mc-product-stock-manager' ) );
-							if ( $in_stock ) {
-								$settings->set_campaign( 'in_stock' , $in_stock );
-								$api->update_campaign( $in_stock, $list_id, $content );
-							}
-						}
+						$settings->email_list = $list_id;
 					}
 				}
 			}
