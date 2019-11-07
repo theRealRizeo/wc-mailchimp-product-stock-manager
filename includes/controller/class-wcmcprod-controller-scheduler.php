@@ -66,8 +66,14 @@ class WCMCPROD_Controller_Scheduler {
 			$next_sent_oos 		= date( 'Y-m-d', $next_sent_oos ) . ' ' . $ouf_of_stock;
 
 			$is_send 			= current_time( 'timestamp' ) > strtotime( $next_sent_stock );
+
+			$ouf_of_stock 		= $settings->get_campaign( 'ouf_of_stock' );
+			$in_stock 			= $settings->get_campaign( 'in_stock' );
 			if ( $force ) {
 				$is_send = true;
+			}
+			if ( empty( $in_stock ) ) {
+				$is_send = false;
 			}
 			if ( $is_send ) {
 				$settings->set_last_sent( 'in_stock', current_time( 'timestamp' ) );
@@ -77,10 +83,33 @@ class WCMCPROD_Controller_Scheduler {
 			if ( $force ) {
 				$is_send = true;
 			}
+
+			if ( empty( $ouf_of_stock ) ) {
+				$is_send = false;
+			}
 			if ( $is_send ) {
 				$settings->set_last_sent( 'ouf_of_stock', current_time( 'timestamp' ) );
 			}
 			$settings->save();
+		}
+	}
+
+	/**
+	 * Get Products HTML
+	 * 
+	 * @param string $status - the product status
+	 * 
+	 * @since 1.0.0
+	 * 
+	 * @return string
+	 */
+	private function get_products( $status, $status_text ) {
+		$service = new WCMCPROD_Core_Products();
+		$products = $service->get_products( $status );
+		if ( is_array( $products ) && !empty( $products ) ) {
+
+		} else {
+			return sprintf( __( 'No products found that are %s', 'wc-mc-product-stock-manager' ), $status_text );
 		}
 	}
 }

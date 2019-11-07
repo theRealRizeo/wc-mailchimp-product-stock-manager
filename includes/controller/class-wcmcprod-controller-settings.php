@@ -92,6 +92,32 @@ class WCMCPROD_Controller_Settings {
 					</div>
 					<?php
 				}
+				if ( $settings->api_key ) {
+					$ouf_of_stock 	= $settings->get_campaign( 'ouf_of_stock' );
+					$in_stock 		= $settings->get_campaign( 'in_stock' );
+					if ( empty( $ouf_of_stock ) ) {
+						?>
+						<div class="notice notice-warning">
+							<p>
+								<?php
+									_e( 'Error saving out of stock campaign. Please submit the form to try again', 'wc-mc-product-stock-manager' ); 
+								?>
+							</p>
+						</div>
+						<?php
+					}
+					if ( empty( $in_stock ) ) {
+						?>
+						<div class="notice notice-warning">
+							<p>
+								<?php
+									_e( 'Error saving in stock campaign. Please submit the form to try again', 'wc-mc-product-stock-manager' ); 
+								?>
+							</p>
+						</div>
+						<?php
+					}
+				}
 			?>
 			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 				<input type="hidden" name="action" value="wc_mc_product_stock_manager" />
@@ -256,8 +282,8 @@ class WCMCPROD_Controller_Settings {
 
 					if ( $create_or_update ) {
 						if ( empty( $settings->campaign ) ) {
-							$ouf_of_stock 	= $api->save_campaign( $list_id, 'Products Out Of Stock', 'Products Out Of Stock' );
-							$in_stock 		= $api->save_campaign( $list_id, 'Products In Stock', 'Products In Stock' );
+							$ouf_of_stock 	= $api->save_campaign( $list_id, __( 'Products Out Of Stock', 'wc-mc-product-stock-manager' ), __( 'Products Out Of Stock', 'wc-mc-product-stock-manager' ) );
+							$in_stock 		= $api->save_campaign( $list_id, __( 'Products In Stock', 'wc-mc-product-stock-manager' ), __( 'Products In Stock', 'wc-mc-product-stock-manager' ) );
 
 							if ( $ouf_of_stock ) {
 								$settings->set_campaign( 'ouf_of_stock' , $ouf_of_stock );
@@ -269,14 +295,14 @@ class WCMCPROD_Controller_Settings {
 							$ouf_of_stock 	= $settings->get_campaign( 'ouf_of_stock' );
 							$in_stock 		= $settings->get_campaign( 'in_stock' );
 							if ( empty( $ouf_of_stock ) ) {
-								$ouf_of_stock 	= $api->save_campaign( $list_id, 'Products Out Of Stock', 'Products Out Of Stock' );
+								$ouf_of_stock 	= $api->save_campaign( $list_id, __( 'Products Out Of Stock', 'wc-mc-product-stock-manager' ), __( 'Products Out Of Stock', 'wc-mc-product-stock-manager' ) );
 								$settings->set_campaign( 'ouf_of_stock' , $ouf_of_stock );
 							} else {
 								$api->update_campaign( $ouf_of_stock, $list_id, $content );
 							}
 
 							if ( empty( $in_stock ) ) {
-								$in_stock 	= $api->save_campaign( $list_id, 'Products In Stock', 'Products In Stock' );
+								$in_stock 	= $api->save_campaign( $list_id, __( 'Products In Stock', 'wc-mc-product-stock-manager' ), __( 'Products In Stock', 'wc-mc-product-stock-manager' ) );
 								$settings->set_campaign( 'in_stock' , $in_stock );
 							} else {
 								$api->update_campaign( $in_stock, $list_id, $content );
@@ -286,7 +312,7 @@ class WCMCPROD_Controller_Settings {
 						$ouf_of_stock 	= $settings->get_campaign( 'ouf_of_stock' );
 						$in_stock 		= $settings->get_campaign( 'in_stock' );
 						if ( empty( $ouf_of_stock ) ) {
-							$ouf_of_stock 	= $api->save_campaign( $list_id, 'Products Out Of Stock', 'Products Out Of Stock' );
+							$ouf_of_stock 	= $api->save_campaign( $list_id, __( 'Products Out Of Stock', 'wc-mc-product-stock-manager' ), __( 'Products Out Of Stock', 'wc-mc-product-stock-manager' ) );
 							if ( $ouf_of_stock ) {
 								$settings->set_campaign( 'ouf_of_stock' , $ouf_of_stock );
 								$api->update_campaign( $ouf_of_stock, $list_id, $content );
@@ -294,7 +320,7 @@ class WCMCPROD_Controller_Settings {
 						}
 
 						if ( empty( $in_stock ) ) {
-							$in_stock 	= $api->save_campaign( $list_id, 'Products In Stock', 'Products In Stock' );
+							$in_stock 	= $api->save_campaign( $list_id, __( 'Products In Stock', 'wc-mc-product-stock-manager' ), __( 'Products In Stock', 'wc-mc-product-stock-manager' ) );
 							if ( $in_stock ) {
 								$settings->set_campaign( 'in_stock' , $in_stock );
 								$api->update_campaign( $in_stock, $list_id, $content );
@@ -314,11 +340,35 @@ class WCMCPROD_Controller_Settings {
 		exit;
 	}
 
+	/**
+	 * Action based on stock status
+	 * Update the database to send out the product data
+	 * 
+	 * @param int $product_id - the product id
+	 * @param string $status - the product status
+	 * @param WC_Product $product - the product
+	 * 
+	 * @since 1.0.0
+	 */
 	public function action_based_on_stock_status( $product_id, $status, $product ) {
+		$service = new WCMCPROD_Core_Products();
+		if ( !$product ) {
+			$product = wc_get_product( $product_id );
+		}
 		if ( $status == 'instock' ) {
-
+			$save_id = $service->get_product( $product_id );
+			if ( !$save_id ) {
+				$service->save_product( $product_id, $product->get_name(), $product->get_permalink(), 'in_stock' );
+			} else {
+				$service->update_product( $save_id, $product->get_name(), $product->get_permalink(), 'in_stock' );
+			}
 		} else if ( $status == 'outofstock' ) {
-
+			$save_id = $service->get_product( $product_id );
+			if ( !$save_id ) {
+				$service->save_product( $product_id, $product->get_name(), $product->get_permalink(), 'out_of_stock' );
+			} else {
+				$service->update_product( $save_id, $product->get_name(), $product->get_permalink(), 'out_of_stock' );
+			}
 		}
 	}
 }
