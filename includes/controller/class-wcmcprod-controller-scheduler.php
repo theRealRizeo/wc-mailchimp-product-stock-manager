@@ -50,8 +50,9 @@ class WCMCPROD_Controller_Scheduler {
 	}
 
 	public function maybe_send_export( $force = false ) {
-		$settings = new WCMCPROD_Core_Settings();
-		if ( $settings->enabled && $settings->api_key && $settings->email_list ) {
+		$settings 	= new WCMCPROD_Core_Settings();
+		$send 		= $force ? true : $settings->enabled;
+		if ( $send && $settings->api_key && $settings->email_list ) {
 			$list_id 			= $settings->email_list;
 			$api 				= new WCMCPROD_Core_Mailchimp( $settings->api_key, $settings->data_center );
 			$schedule 			= $settings->schedule; //The time of the day
@@ -85,7 +86,7 @@ class WCMCPROD_Controller_Scheduler {
 				$updated 	= $api->update_campaign( $in_stock, $list_id, $to_send );
 				if ( $updated ) {
 					$sent 	= $api->send_campaign( $in_stock );
-					if ( $sent ) {
+					if ( $sent && !$force ) {
 						$settings->set_last_sent( 'in_stock', current_time( 'timestamp' ) );
 					}
 				}
@@ -106,7 +107,7 @@ class WCMCPROD_Controller_Scheduler {
 				$updated 	= $api->update_campaign( $ouf_of_stock, $list_id, $to_send );
 				if ( $updated ) {
 					$sent 	= $api->send_campaign( $ouf_of_stock );
-					if ( $sent ) {
+					if ( $sent && !$force ) {
 						$settings->set_last_sent( 'ouf_of_stock', current_time( 'timestamp' ) );
 					}
 				}

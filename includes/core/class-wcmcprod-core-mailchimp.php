@@ -86,7 +86,7 @@ class WCMCPROD_Core_Mailchimp {
 
 		if( "GET" === $verb ){
 			$url .= ( "?" . http_build_query( $args ) );
-		}else{
+		}else if ( isset( $args['body'] ) ) {
 			$_args['body'] = wp_json_encode( $args['body'] );
 		}
 
@@ -249,7 +249,7 @@ class WCMCPROD_Core_Mailchimp {
 	 */
 	public function update_campaign( $id, $list_id, $content ) {
 		$data 			= array(
-			'html'			=> $content,
+			'plain_text'	=> $content,
 			'recipients' 	=> array( 'list_id' => $list_id ),
 		);
 		$res = $this->_put( 'campaigns/' . $id . '/content', array(

@@ -36,6 +36,8 @@ class WCMCPROD_Controller_Settings {
 
 		add_action( 'admin_post_wc_mc_product_stock_manager', array( $this, 'save_settings' ) );
 
+		add_action( 'wp_ajax_wc_mc_product_stock_manager_test', array( $this, 'test_sending' ) );
+
 		add_action( 'woocommerce_product_set_stock_status', array( $this, 'action_based_on_stock_status' ), 999, 3 );
 	}
 
@@ -115,6 +117,12 @@ class WCMCPROD_Controller_Settings {
 								?>
 							</p>
 						</div>
+						<?php
+					}
+
+					if ( !empty( $ouf_of_stock ) && !empty( $in_stock ) && !empty( $settings->email_list ) ) {
+						?>
+						<a href="#" class="button button-primary wc_mc_product_stock_manager_test"><?php _e( 'Send Test Emails', 'wc-mc-product-stock-manager' ); ?></a>
 						<?php
 					}
 				}
@@ -220,8 +228,9 @@ class WCMCPROD_Controller_Settings {
 										</th>
 										<td>
 											<?php
-												$content = $settings->get_message();
-												wp_editor( $content, 'email_content' );
+												$content 	= $settings->get_message();
+												$settings  = array( 'media_buttons' => false );
+												wp_editor( $content, 'email_content', $settings );
 											?>
 											<p class="description">
 												<?php echo sprintf( __( 'Use %s and %s to represent the state of the products and the list of the products', 'wc-mc-product-stock-manager' ), '<strong>{product_state}</strong>', '<strong>{product_list}</strong>' ); ?>
@@ -239,6 +248,31 @@ class WCMCPROD_Controller_Settings {
 				<?php submit_button(); ?>
 			</form>
 		</div>
+		<script type="text/javascript">
+			jQuery(function($) {
+				$('body').on('click', 'a.wc_mc_product_stock_manager_test', function(e){
+					e.preventDefault();
+					var $button = $(this),
+						$btn_txt = $button.text(),
+						$nonce = '<?php echo wp_create_nonce( 'wc_mc_product_stock_manager_test' ); ?>';
+
+					$button.attr('disabled', 'disabled');
+					$button.html('<span class="spinner is-active"></span>');
+					$.post(
+						window.ajaxurl,
+						{ 'action' : 'wc_mc_product_stock_manager_test', '_wpnonce' : $nonce }
+					).done( function( response ) {
+						$button.removeAttr('disabled');
+						$button.html($btn_txt);
+						alert( response.data );
+					}).fail(function(xhr, status, error) {
+						$button.removeAttr('disabled');
+						$button.html($btn_txt);
+						alert( 'An error occured' );
+					});
+				});
+			});
+		</script>
 		<?php
 	}
 
@@ -338,6 +372,18 @@ class WCMCPROD_Controller_Settings {
 		}
 		wp_safe_redirect( $url );
 		exit;
+	}
+
+	/**
+	 * Test Sending
+	 */
+	public function test_sending() {
+		if ( wp_verify_nonce( $_POST['_wpnonce'], 'wc_mc_product_stock_manager_test' ) ) {
+			do_action( 'wc_mc_product_stock_manager_send_report', true );
+			wp_send_json_success( __( 'Email sent via MailChimp', 'wc-mc-product-stock-manager' ) );
+		} else {
+			wp_send_json_error( __( 'Error scheduling a test. Please refresh the page and try again', 'wc-mc-product-stock-manager' ) );
+		}
 	}
 
 	/**
