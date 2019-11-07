@@ -45,26 +45,13 @@ class WCMCPROD_Controller_Scheduler {
 		if ( $send && $settings->api_key && $settings->email_list ) {
 			$list_id 			= $settings->email_list;
 			$api 				= new WCMCPROD_Core_Mailchimp( $settings->api_key, $settings->data_center );
-			$schedule 			= $settings->schedule; //The time of the day
-			$ouf_of_stock 		= $settings->get_schedule( 'ouf_of_stock', 18 );
-			$in_stock 			= $settings->get_schedule( 'in_stock', 18 );
 
-			$last_sent_stock 	= $settings->get_last_sent( 'in_stock', null ); //last sent
-			$last_sent_oos 		= $settings->get_last_sent( 'ouf_of_stock', null ); //last sent
-
-			$next_sent_stock 	= strtotime( '+24 hours', $last_sent_stock );
-			$next_sent_stock 	= date( 'Y-m-d', $next_sent_stock ) . ' ' . $in_stock;
-
-			$next_sent_oos 		= strtotime( '+24 hours', $last_sent_oos );
-			$next_sent_oos 		= date( 'Y-m-d', $next_sent_oos ) . ' ' . $ouf_of_stock;
-
-			$is_send 			= current_time( 'timestamp' ) > strtotime( $next_sent_stock );
 			$current_date		= date_i18n( get_option( 'date_format' ), current_time( 'timestamp' ) );
 			$out_of_stock_title	= sprintf( __( 'Products Out Of Stock - %s', 'wc-mc-product-stock-manager' ), $current_date );
 			$in_stock_title		= sprintf( __( 'Products In Stock - %s', 'wc-mc-product-stock-manager' ), $current_date );
 
 			$sent_forced 		= true;
-
+			$is_send 			= true;
 			
 			$in_stock 			= $api->save_campaign( $list_id, $in_stock_title, $in_stock_title, $settings->from_email, $settings->from_name );
 			if ( $force ) {
@@ -81,7 +68,7 @@ class WCMCPROD_Controller_Scheduler {
 				if ( $updated ) {
 					$sent 	= $api->send_campaign( $in_stock );
 					if ( $sent && !$force ) {
-						$settings->set_last_sent( 'in_stock', current_time( 'timestamp' ) );
+						
 					} else {
 						if ( !$sent && $force ) {
 							$sent_forced = false;
@@ -96,7 +83,7 @@ class WCMCPROD_Controller_Scheduler {
 			}
 
 			$ouf_of_stock 	= $api->save_campaign( $list_id, $out_of_stock_title, $out_of_stock_title, $settings->from_email, $settings->from_name );
-			$is_send 		= current_time( 'timestamp' ) > strtotime( $next_sent_oos );
+			$is_send 		= true;
 			if ( $force ) {
 				$is_send = true;
 			}
@@ -112,7 +99,7 @@ class WCMCPROD_Controller_Scheduler {
 				if ( $updated ) {
 					$sent 	= $api->send_campaign( $ouf_of_stock );
 					if ( $sent && !$force ) {
-						$settings->set_last_sent( 'ouf_of_stock', current_time( 'timestamp' ) );
+						
 					} else {
 						if ( !$sent && $force ) {
 							$sent_forced = false;

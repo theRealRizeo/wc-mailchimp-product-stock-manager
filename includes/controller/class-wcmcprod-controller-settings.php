@@ -159,6 +159,17 @@ class WCMCPROD_Controller_Settings {
 									?>
 									<tr>
 										<th scope="row">
+											<label for="schedule_run"><?php _e( 'Next Run Time', 'wc-mc-product-stock-manager' ); ?></label>
+										</th>
+										<td>
+											<?php
+												$timestamp 		= wp_next_scheduled( 'wc_mc_product_stock_manager_send_report' );
+												echo date_i18n( get_option('date_format') . ' ' . get_option('time_format') . ' (P)', $timestamp );
+											?>
+										</td>
+									</tr>
+									<tr>
+										<th scope="row">
 											<label for="from_email"><?php _e( 'MailChimp Campaign Reply To Email', 'wc-mc-product-stock-manager' ); ?></label>
 										</th>
 										<td>
