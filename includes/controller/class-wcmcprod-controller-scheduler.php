@@ -33,22 +33,12 @@ class WCMCPROD_Controller_Scheduler {
 	}
 
 	public function __construct() {
-		add_action( 'init', array( &$this, 'schedule_email_sender' ) );
-
 		add_action( 'wc_mc_product_stock_manager_send_report', array( &$this, 'maybe_send_export' ) );
 	}
 
 	/**
-	 * Set the email sender
-	 * 
-	 * @since 1.0.0
+	 * Send report once daily
 	 */
-	public function schedule_email_sender() {
-		if ( ! wp_next_scheduled( 'wc_mc_product_stock_manager_send_report' ) ) {
-			wp_schedule_single_event( time(), 'wc_mc_product_stock_manager_send_report' );
-		}
-	}
-
 	public function maybe_send_export( $force = false ) {
 		$settings 	= new WCMCPROD_Core_Settings();
 		$send 		= $force ? true : $settings->enabled;

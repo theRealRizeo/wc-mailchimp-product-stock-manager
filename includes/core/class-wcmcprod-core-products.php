@@ -35,6 +35,7 @@ class WCMCPROD_Core_Products {
         return $products;
     }
 
+
     /**
      * Get products by status
      * 
@@ -44,10 +45,10 @@ class WCMCPROD_Core_Products {
      * 
      * @return array
      */
-    public function get_products( $status ) {
+    public function count_products( $status ) {
         global $wpdb;
-        $sql        = "SELECT `id`, `product_id`, `product_name`, `product_url` FROM {$this->table_name} WHERE `status` = %s AND `processed` = 'pending'";
-        $products   = $wpdb->get_results( $wpdb->prepare( $sql, $status ) );
+        $sql        = "SELECT COUNT(`id`) FROM {$this->table_name} WHERE `status` = %s";
+        $products   = $wpdb->get_var( $wpdb->prepare( $sql, $status ) );
         return $products;
     }
 

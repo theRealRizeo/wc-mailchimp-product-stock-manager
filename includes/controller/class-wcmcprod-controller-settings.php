@@ -38,6 +38,8 @@ class WCMCPROD_Controller_Settings {
 
 		add_action( 'wp_ajax_wc_mc_product_stock_manager_test', array( $this, 'test_sending' ) );
 
+		add_action( 'wp_ajax_wc_mc_product_stock_manager_sync_products', array( $this, 'sync_products' ) );
+
 		add_action( 'woocommerce_product_set_stock_status', array( $this, 'action_based_on_stock_status' ), 999, 3 );
 	}
 
@@ -65,7 +67,6 @@ class WCMCPROD_Controller_Settings {
 	 */
 	public function admin_page() {
 		$settings = new WCMCPROD_Core_Settings();
-		
 		?>
 		<div class="wrap">
 			<h1><?php _e( 'MailChimp Product Stock Manager Settings', 'wc-mc-product-stock-manager' ); ?></h1>
@@ -100,6 +101,7 @@ class WCMCPROD_Controller_Settings {
 					<?php
 				}
 			?>
+			<a href="#" class="button button-primary wc_mc_product_stock_manager_sync"><?php _e( 'Sync Out Of Stock Products', 'wc-mc-product-stock-manager' ); ?></a>
 			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 				<input type="hidden" name="action" value="wc_mc_product_stock_manager" />
 				<?php wp_nonce_field( 'wc_mc_product_stock_manager' ); ?>
@@ -195,44 +197,7 @@ class WCMCPROD_Controller_Settings {
 											</select>
 										</td>
 									</tr>
-									<tr>
-										<th scope="row">
-											<label for="ouf_of_stock"><?php _e( 'Out of Stock Send Daily At', 'wc-mc-product-stock-manager' ); ?></label>
-										</th>
-										<td>
-											
-											<select name="ouf_of_stock" id="ouf_of_stock" required>
-												<option value=""><?php _e( 'Select Time', 'wc-mc-product-stock-manager' ); ?></option>
-												<?php
-													$ouf_of_stock = $settings->get_schedule( 'ouf_of_stock', 18 );
-													for ( $i = 1; $i <= 24; $i++ ) {
-														?>
-														<option value="<?php echo $i; ?>" <?php selected( $ouf_of_stock, $i ); ?>><?php echo date( "h.iA", strtotime( "$i:00" ) ); ?></option>
-														<?php
-													}
-												?>
-											</select>
-										</td>
-									</tr>
-									<tr>
-										<th scope="row">
-											<label for="listin_stock_id"><?php _e( 'In Stock Send Daily At', 'wc-mc-product-stock-manager' ); ?></label>
-										</th>
-										<td>
-											
-											<select name="in_stock" id="in_stock" required>
-												<option value=""><?php _e( 'Select Time', 'wc-mc-product-stock-manager' ); ?></option>
-												<?php 
-													$in_stock = $settings->get_schedule( 'in_stock', 18 );
-													for ( $i = 1; $i <= 24; $i++ ) {
-														?>
-														<option value="<?php echo $i; ?>" <?php selected( $in_stock, $i ); ?>><?php echo date( "h.iA", strtotime( "$i:00" ) ); ?></option>
-														<?php
-													}
-												?>
-											</select>
-										</td>
-									</tr>
+									
 									<tr>
 										<th scope="row">
 											<label for="api_key"><?php _e( 'Email Template', 'wc-mc-product-stock-manager' ); ?></label>
@@ -282,6 +247,28 @@ class WCMCPROD_Controller_Settings {
 						alert( 'An error occured' );
 					});
 				});
+				$('body').on('click', 'a.wc_mc_product_stock_manager_sync', function(e){
+					e.preventDefault();
+					var $button = $(this),
+						$btn_txt = $button.text(),
+						$nonce = '<?php echo wp_create_nonce( 'wc_mc_product_stock_manager_sync_products' ); ?>';
+
+					$button.attr('disabled', 'disabled');
+					$button.html('<span class="spinner is-active"></span>');
+					$.post(
+						window.ajaxurl,
+						{ 'action' : 'wc_mc_product_stock_manager_sync_products', '_wpnonce' : $nonce }
+					).done( function( response ) {
+						$button.removeAttr('disabled');
+						$button.html($btn_txt);
+						alert( response.data );
+					}).fail(function(xhr, status, error) {
+						$button.removeAttr('disabled');
+						$button.html($btn_txt);
+						alert( 'An error occured' );
+					});
+				});
+				
 			});
 		</script>
 		<?php
@@ -310,19 +297,12 @@ class WCMCPROD_Controller_Settings {
 				$settings->api_key 		= $api_key;
 				$settings->data_center 	= $data_center;
 				$settings->email_template = $content;
-
-				$ouf_of_stock_time	= sanitize_text_field( $_POST['ouf_of_stock'] );
-				$in_stock_time		= sanitize_text_field( $_POST['in_stock'] );
 				$from_email			= sanitize_text_field( $_POST['from_email'] );
 				$from_name			= sanitize_text_field( $_POST['from_name'] );
 
 				$settings->from_email 	= $from_email;
 				$settings->from_name 	= $from_name;
-
-				$settings->set_schedule( 'in_stock', $in_stock_time );
-				$settings->set_schedule( 'ouf_of_stock', $ouf_of_stock_time );
 				if ( !empty( $list_id ) ) {
-					$create_or_update = false;
 					if ( !$settings->email_list ) {
 						$settings->email_list = $list_id;
 					}
@@ -386,6 +366,45 @@ class WCMCPROD_Controller_Settings {
 			if ( $save_id ) {
 				$service->delete_product( $save_id );
 			}
+		}
+	}
+
+	/**
+	 * Sync products out of stock
+	 * 
+	 * Called on first run
+	 */
+	public function sync_products() {
+		if ( wp_verify_nonce( $_POST['_wpnonce'], 'wc_mc_product_stock_manager_sync_products' ) ) {
+			$args = array(
+				'post_type' => 'product',
+				'posts_per_page' => -1,
+				'post_status' => 'publish',
+				'meta_query' => array(
+				array(
+					'key' => '_stock_status',
+					'value' => 'outofstock',
+					'compare' => '='
+				)
+				),
+				'fields' => 'ids',
+			);
+			$service 		= new WCMCPROD_Core_Products();
+			$product_ids 	= get_posts( $args ); 
+
+			foreach ( $product_ids as $product_id ) {
+				$product = wc_get_product( $product_id );
+				$save_id = $service->get_product( $product_id );
+				if ( !$save_id ) {
+					$service->save_product( $product_id, $product->get_name(), $product->get_permalink(), 'out_of_stock' );
+				} else {
+					$service->update_product( $save_id, $product->get_name(), $product->get_permalink(), 'out_of_stock' );
+				}
+			}
+
+			wp_send_json_success( sprintf( __( ' %d products synced', 'wc-mc-product-stock-manager' ), count( $product_ids ) ) );
+		} else {
+			wp_send_json_error( __( 'Not allowed', 'wc-mc-product-stock-manager' ) );
 		}
 	}
 }

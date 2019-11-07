@@ -71,6 +71,10 @@ class WCMCPROD_Core_Plugin {
 
 		//Create debug directory
 		WCMCPROD_Core_Debug::init_directory();
+
+		if ( ! wp_next_scheduled( 'wc_mc_product_stock_manager_send_report' ) ) {
+			wp_schedule_event( time(), 'daily', 'wc_mc_product_stock_manager_send_report' );
+		}
 	}
 
 	/**
