@@ -112,7 +112,7 @@ class WCMCPROD_Core_Products {
 		$sql 		= "SELECT `id` FROM {$this->table_name} WHERE `product_id` = %d";
 		$product 	= $wpdb->get_row( $wpdb->prepare( $sql, $product_id ) );
 		if ( $product ) {
-			return $product;
+			return $product->id;
 		}
 		return false;
 	}

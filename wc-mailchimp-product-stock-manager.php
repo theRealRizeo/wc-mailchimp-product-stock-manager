@@ -78,6 +78,7 @@ if ( ! class_exists( 'WC_MC_Product_Stock_Manager' ) ) :
 		 * @since 1.0.0
 		 */
 		protected function define_constants() {
+			$upload_dir = wp_upload_dir();
 			$this->define( 'WCMCPROD_VERSION', $this->version );
 			$this->define( 'WCMCPROD_PLUGIN_FILE', __FILE__ );
 			$this->define( 'WCMCPROD_PLUGIN', plugin_basename( __FILE__ ) );
@@ -85,6 +86,7 @@ if ( ! class_exists( 'WC_MC_Product_Stock_Manager' ) ) :
 			$this->define( 'WCMCPROD_PLUGIN_BASE_DIR', dirname( __FILE__ ) );
 			$this->define( 'WCMCPROD_PLUGIN_INCLUDES_DIR', WCMCPROD_PLUGIN_BASE_DIR . '/includes/' );
 			$this->define( 'WCMCPROD_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
+			$this->define( 'WCMCPROD_LOG_DIR', $upload_dir['basedir'] . '/wc-mc-logs/' );
 		}
 
 		/**

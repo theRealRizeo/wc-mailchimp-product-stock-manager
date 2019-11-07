@@ -73,7 +73,7 @@ class WCMCPROD_Controller_Scheduler {
 			$out_of_stock_title	= sprintf( __( 'Products Out Of Stock - %s', 'wc-mc-product-stock-manager' ), $current_date );
 			$in_stock_title		= sprintf( __( 'Products In Stock - %s', 'wc-mc-product-stock-manager' ), $current_date );
 
-			$ouf_of_stock 		= $api->save_campaign( $list_id, $ouf_of_stock_title, $ouf_of_stock_title );
+			$ouf_of_stock 		= $api->save_campaign( $list_id, $out_of_stock_title, $out_of_stock_title );
 			$in_stock 			= $api->save_campaign( $list_id, $in_stock_title, $in_stock_title );
 			if ( $force ) {
 				$is_send = true;

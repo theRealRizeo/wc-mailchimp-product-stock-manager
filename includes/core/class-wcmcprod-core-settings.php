@@ -20,6 +20,15 @@ class WCMCPROD_Core_Settings {
 	 */
 	public $enabled = false;
 
+	/**
+	 * Debug status
+	 * 
+	 * @since 1.0.0
+	 * 
+	 * @var bool
+	 */
+	public $debug = false;
+
     /**
      * Mailchimp API Key
      * 
@@ -155,6 +164,7 @@ class WCMCPROD_Core_Settings {
 	public function save() {
 		$settings = array(
 			'enabled'			=> $this->enabled,
+			'debug'				=> $this->debug,
 			'api_key'           => $this->api_key,
 			'data_center'       => $this->data_center,
             'email_list'        => $this->email_list,

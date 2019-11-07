@@ -119,6 +119,22 @@ class WCMCPROD_Controller_Settings {
 							</td>
 						</tr>
 						<tr>
+							<th scope="row"><?php _e( 'Debug', 'wc-mc-product-stock-manager' ); ?></th>
+							<td>
+								<fieldset>
+									<legend class="screen-reader-text">
+										<span><?php _e( 'Debug', 'wc-mc-product-stock-manager' ); ?></span>
+									</legend>
+									<label for="debug">
+										<input name="debug" type="checkbox" id="debug" value="1" <?php checked( $settings->debug, 1 ); ?> />
+									</label>
+								</fieldset>
+								<p class="description">
+									<?php _e( 'Use this to log responses from the api. This logs only the sending process', 'wc-mc-product-stock-manager' ); ?>
+								</p>
+							</td>
+						</tr>
+						<tr>
 							<th scope="row">
 								<label for="api_key"><?php _e( 'MailChimp API Key', 'wc-mc-product-stock-manager' ); ?></label>
 							</th>
@@ -258,6 +274,7 @@ class WCMCPROD_Controller_Settings {
 			$exploded 		= explode( '-', $api_key );
 			$data_center 	= end( $exploded );
 			$enabled		= isset( $_POST['enabled'] );
+			$debug			= isset( $_POST['debug'] );
 			$list_id		= isset( $_POST['list_id'] ) ? sanitize_text_field( $_POST['list_id'] ) : '';
 			$content 		= isset( $_POST['email_content'] ) ? wp_kses_post( $_POST['email_content'] ) : '';
 
@@ -284,7 +301,8 @@ class WCMCPROD_Controller_Settings {
 					}
 				}
 			}
-			$settings->enabled = $enabled;
+			$settings->enabled 	= $enabled;
+			$settings->debug	= $debug;
 			$settings->save();
 
 			$url = add_query_arg( 'success', 'true', $url );
@@ -336,7 +354,7 @@ class WCMCPROD_Controller_Settings {
 			} else {
 				$service->update_product( $save_id, $product->get_name(), $product->get_permalink(), 'out_of_stock' );
 			}
-		} else if ( $status == 'instock' ) {
+		} else if ( $status == 'onbackorder' ) {
 			$save_id = $service->get_product( $product_id );
 			if ( $save_id ) {
 				$service->delete_product( $save_id );

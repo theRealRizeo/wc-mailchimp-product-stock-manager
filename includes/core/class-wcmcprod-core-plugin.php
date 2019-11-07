@@ -68,6 +68,9 @@ class WCMCPROD_Core_Plugin {
 	function plugin_activation() {
 		//Create database
 		WCMCPROD_Core_Database::init();
+
+		//Create debug directory
+		WCMCPROD_Core_Debug::init_directory();
 	}
 
 	/**

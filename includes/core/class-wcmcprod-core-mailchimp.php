@@ -46,7 +46,16 @@ class WCMCPROD_Core_Mailchimp {
      * 
      * @var string
      */
-    private $_endpoint = 'https://<dc>.api.mailchimp.com/3.0/';
+	private $_endpoint = 'https://<dc>.api.mailchimp.com/3.0/';
+	
+	/**
+	 * Debug object
+	 * 
+	 * @since 1.0.0
+	 * 
+	 * @var object
+	 */
+	private $debug;
     
     /**
 	 * Constructs class with required data
@@ -59,6 +68,7 @@ class WCMCPROD_Core_Mailchimp {
 		$this->_data_center = $data_center;
 		$this->_endpoint    = str_replace( '<dc>', $data_center, $this->_endpoint );
 		$this->_user 		= is_user_logged_in() ? wp_get_current_user()->display_name : 'admin';
+		$this->debug		= WCMCPROD_Core_Debug::instance();
 	}
 
 	/**
@@ -233,6 +243,7 @@ class WCMCPROD_Core_Mailchimp {
 		$res = $this->_post( 'campaigns', array(
 			'body' =>  $data
 		) );
+		$this->debug->log( $res );
 		if ( ! is_wp_error( $res ) ) {
 			return $res->id;
 		} else {
@@ -254,6 +265,7 @@ class WCMCPROD_Core_Mailchimp {
 		$res = $this->_put( 'campaigns/' . $id . '/content', array(
 			'body' =>  $data
 		) );
+		$this->debug->log( $res );
 		if ( ! is_wp_error( $res ) ) {
 			return true;
 		} else {
@@ -266,6 +278,7 @@ class WCMCPROD_Core_Mailchimp {
 	 */
 	public function send_campaign( $id ) {
 		$res = $this->_post( 'campaigns/' . $id . '/actions/send' );
+		$this->debug->log( $res );
 		if ( ! is_wp_error( $res ) ) {
 			return true;
 		} else {
@@ -277,7 +290,8 @@ class WCMCPROD_Core_Mailchimp {
 	 * Send campaign
 	 */
 	public function delete_campaign( $id ) {
-		$res = $this->_delete( 'campaigns/' . $id . '/actions/send' );
+		$res = $this->_delete( 'campaigns/' . $id );
+		$this->debug->log( $res );
 		if ( ! is_wp_error( $res ) ) {
 			return true;
 		} else {
