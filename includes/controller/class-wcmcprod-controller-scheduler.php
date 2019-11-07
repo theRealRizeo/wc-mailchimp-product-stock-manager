@@ -73,52 +73,74 @@ class WCMCPROD_Controller_Scheduler {
 			$out_of_stock_title	= sprintf( __( 'Products Out Of Stock - %s', 'wc-mc-product-stock-manager' ), $current_date );
 			$in_stock_title		= sprintf( __( 'Products In Stock - %s', 'wc-mc-product-stock-manager' ), $current_date );
 
-			$ouf_of_stock 		= $api->save_campaign( $list_id, $out_of_stock_title, $out_of_stock_title );
-			$in_stock 			= $api->save_campaign( $list_id, $in_stock_title, $in_stock_title );
+			$sent_forced 		= true;
+
+			
+			$in_stock 			= $api->save_campaign( $list_id, $in_stock_title, $in_stock_title, $settings->from_email, $settings->from_name );
 			if ( $force ) {
 				$is_send = true;
 			}
-			if ( empty( $in_stock ) ) {
+			if ( !$in_stock ) {
 				$is_send = false;
 			}
-			$content = $settings->email_template;
 			if ( $is_send ) {
 				$products 	= $this->get_products( 'in_stock', __( 'In Stock', 'wc-mc-product-stock-manager' ) );
-				$to_send 	= $this->replace_content( __( 'In Stock', 'wc-mc-product-stock-manager' ), $products, $content );
+				$to_send 	= $this->replace_content( __( 'In Stock', 'wc-mc-product-stock-manager' ), $products, $settings->email_template );
 
 				$updated 	= $api->update_campaign( $in_stock, $to_send );
 				if ( $updated ) {
 					$sent 	= $api->send_campaign( $in_stock );
 					if ( $sent && !$force ) {
 						$settings->set_last_sent( 'in_stock', current_time( 'timestamp' ) );
+					} else {
+						if ( !$sent && $force ) {
+							$sent_forced = false;
+						}
+					}
+				} else {
+					if ( $force ) {
+						$sent_forced = false;
 					}
 				}
-				$api->delete_campaign( $in_stock );
+				//$api->delete_campaign( $in_stock );
 			}
 
-			$is_send = current_time( 'timestamp' ) > strtotime( $next_sent_oos );
+			$ouf_of_stock 	= $api->save_campaign( $list_id, $out_of_stock_title, $out_of_stock_title, $settings->from_email, $settings->from_name );
+			$is_send 		= current_time( 'timestamp' ) > strtotime( $next_sent_oos );
 			if ( $force ) {
 				$is_send = true;
 			}
 
-			if ( empty( $ouf_of_stock ) ) {
+			if ( !$ouf_of_stock ) {
 				$is_send = false;
 			}
 			if ( $is_send ) {
 				$products 	= $this->get_products( 'out_of_stock', __( 'Out Of Stock', 'wc-mc-product-stock-manager' ) );
-				$to_send 	= $this->replace_content( __( 'Out Of Stock', 'wc-mc-product-stock-manager' ), $products, $content );
+				$to_send 	= $this->replace_content( __( 'Out Of Stock', 'wc-mc-product-stock-manager' ), $products, $settings->email_template );
 
 				$updated 	= $api->update_campaign( $ouf_of_stock, $to_send );
 				if ( $updated ) {
 					$sent 	= $api->send_campaign( $ouf_of_stock );
 					if ( $sent && !$force ) {
 						$settings->set_last_sent( 'ouf_of_stock', current_time( 'timestamp' ) );
+					} else {
+						if ( !$sent && $force ) {
+							$sent_forced = false;
+						}
+					}
+				}  else {
+					if ( $force ) {
+						$sent_forced = false;
 					}
 				}
-				$api->delete_campaign( $ouf_of_stock );
+				//$api->delete_campaign( $ouf_of_stock );
 				
 			}
 			$settings->save();
+
+			if ( $force && !$sent_forced ) {
+				wp_send_json_error( __( 'Error sending test email', 'wc-mc-product-stock-manager' ) );
+			}
 		}
 	}
 

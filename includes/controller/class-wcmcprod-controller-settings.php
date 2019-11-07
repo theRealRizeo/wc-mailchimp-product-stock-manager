@@ -94,7 +94,7 @@ class WCMCPROD_Controller_Settings {
 					</div>
 					<?php
 				}
-				if ( $settings->api_key ) {
+				if ( $settings->api_key && !empty( $settings->from_email ) && !empty( $settings->from_name ) && !empty( $settings->email_list ) ) {
 					?>
 					<a href="#" class="button button-primary wc_mc_product_stock_manager_test"><?php _e( 'Send Test Emails', 'wc-mc-product-stock-manager' ); ?></a>
 					<?php
@@ -155,6 +155,28 @@ class WCMCPROD_Controller_Settings {
 										$drop_down = wp_list_pluck( $_lists, 'name', 'id' );
 									}
 									?>
+									<tr>
+										<th scope="row">
+											<label for="from_email"><?php _e( 'MailChimp Campaign Reply To Email', 'wc-mc-product-stock-manager' ); ?></label>
+										</th>
+										<td>
+											<input name="from_email" type="text" id="from_email" value="<?php echo $settings->from_email; ?>" class="regular-text" required/>
+											<p class="description">
+												<?php _e( 'Reply to email', 'wc-mc-product-stock-manager' ); ?>
+											</p>
+										</td>
+									</tr>
+									<tr>
+										<th scope="row">
+											<label for="from_name"><?php _e( 'MailChimp Campaign From Name', 'wc-mc-product-stock-manager' ); ?></label>
+										</th>
+										<td>
+											<input name="from_name" type="text" id="from_name" value="<?php echo $settings->from_name; ?>" class="regular-text" required/>
+											<p class="from_name">
+												<?php _e( 'Name shown when sending', 'wc-mc-product-stock-manager' ); ?>
+											</p>
+										</td>
+									</tr>
 									<tr>
 										<th scope="row">
 											<label for="list_id"><?php _e( 'MailChimp List', 'wc-mc-product-stock-manager' ); ?></label>
@@ -291,6 +313,11 @@ class WCMCPROD_Controller_Settings {
 
 				$ouf_of_stock_time	= sanitize_text_field( $_POST['ouf_of_stock'] );
 				$in_stock_time		= sanitize_text_field( $_POST['in_stock'] );
+				$from_email			= sanitize_text_field( $_POST['from_email'] );
+				$from_name			= sanitize_text_field( $_POST['from_name'] );
+
+				$settings->from_email 	= $from_email;
+				$settings->from_name 	= $from_name;
 
 				$settings->set_schedule( 'in_stock', $in_stock_time );
 				$settings->set_schedule( 'ouf_of_stock', $ouf_of_stock_time );

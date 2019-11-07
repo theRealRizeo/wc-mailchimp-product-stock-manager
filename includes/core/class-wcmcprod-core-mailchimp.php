@@ -233,12 +233,11 @@ class WCMCPROD_Core_Mailchimp {
 	 * 
 	 * @return string|bool
 	 */
-	public function save_campaign( $list_id, $title, $subject ) {
-		$admin_email 	= get_option( 'admin_email' );
+	public function save_campaign( $list_id, $title, $subject, $reply_to, $from_name ) {
 		$data 			= array(
 			'type'			=> 'regular',
 			'recipients' 	=> array( 'list_id' => $list_id ),
-			'settings'		=> array( 'subject_line' => $subject, 'title' => $title, 'reply_to' => $admin_email, 'from_name' => get_option( 'blogname' ) )
+			'settings'		=> array( 'subject_line' => $subject, 'title' => $title, 'reply_to' => $reply_to, 'from_name' => $from_name )
 		);
 		$res = $this->_post( 'campaigns', array(
 			'body' =>  $data
@@ -258,9 +257,10 @@ class WCMCPROD_Core_Mailchimp {
 	 * 
 	 * @return bool
 	 */
-	public function update_campaign( $id,$content ) {
+	public function update_campaign( $id, $content ) {
 		$data 	= array(
-			'plain_text' => $content,
+			'plain_text' 	=> $content,
+			'html'			=> nl2br( $content )
 		);
 		$res = $this->_put( 'campaigns/' . $id . '/content', array(
 			'body' =>  $data

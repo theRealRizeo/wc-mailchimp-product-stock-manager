@@ -29,6 +29,24 @@ class WCMCPROD_Core_Settings {
 	 */
 	public $debug = false;
 
+	/**
+	 * From email
+	 * 
+	 * @since 1.0.0
+	 * 
+	 * @var string
+	 */
+	public $from_email;
+
+	/**
+	 * From name
+	 * 
+	 * @since 1.0.0
+	 * 
+	 * @var string
+	 */
+	public $from_name;
+
     /**
      * Mailchimp API Key
      * 
@@ -165,6 +183,8 @@ class WCMCPROD_Core_Settings {
 		$settings = array(
 			'enabled'			=> $this->enabled,
 			'debug'				=> $this->debug,
+			'from_email'		=> $this->from_email,
+			'from_name'			=> $this->from_name,
 			'api_key'           => $this->api_key,
 			'data_center'       => $this->data_center,
             'email_list'        => $this->email_list,
