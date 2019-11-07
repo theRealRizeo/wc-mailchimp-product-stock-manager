@@ -53,11 +53,11 @@ class WCMCPROD_Controller_Scheduler {
 		$settings = new WCMCPROD_Core_Settings();
 		if ( $settings->enabled ) {
 			$schedule 			= $settings->schedule; //The time of the day
-			$ouf_of_stock 		= $settings->get_schedule( 'ouf_of_stock' );
-			$in_stock 			= $settings->get_schedule( 'in_stock' );
+			$ouf_of_stock 		= $settings->get_schedule( 'ouf_of_stock', 18 );
+			$in_stock 			= $settings->get_schedule( 'in_stock', 18 );
 
-			$last_sent_stock 	= $settings->get_last_sent( 'in_stock' ); //last sent
-			$last_sent_oos 		= $settings->get_last_sent( 'ouf_of_stock' ); //last sent
+			$last_sent_stock 	= $settings->get_last_sent( 'in_stock', null ); //last sent
+			$last_sent_oos 		= $settings->get_last_sent( 'ouf_of_stock', null ); //last sent
 
 			$next_sent_stock 	= strtotime( '+24 hours', $last_sent_stock );
 			$next_sent_stock 	= date( 'Y-m-d', $next_sent_stock ) . ' ' . $in_stock;
@@ -70,7 +70,7 @@ class WCMCPROD_Controller_Scheduler {
 				$is_send = true;
 			}
 			if ( $is_send ) {
-				$settings->last_sent['in_stock'] = current_time( 'timestamp' );
+				$settings->set_last_sent( 'in_stock', current_time( 'timestamp' ) );
 			}
 
 			$is_send = current_time( 'timestamp' ) > strtotime( $next_sent_oos );
@@ -78,7 +78,7 @@ class WCMCPROD_Controller_Scheduler {
 				$is_send = true;
 			}
 			if ( $is_send ) {
-				$settings->last_sent['ouf_of_stock'] = current_time( 'timestamp' );
+				$settings->set_last_sent( 'ouf_of_stock', current_time( 'timestamp' ) );
 			}
 			$settings->save();
 		}

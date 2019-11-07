@@ -216,8 +216,62 @@ class WCMCPROD_Core_Mailchimp {
 		) );
 	}
 
-	public function save_campaign( $list_id, $title, $subject, $from_name, $reply_to ) {
+	/**
+	 * Save campaign
+	 * 
+	 * @since 1.0.0
+	 * 
+	 * @return string|bool
+	 */
+	public function save_campaign( $list_id, $title, $subject ) {
+		$admin_email 	= get_option( 'admin_email' );
+		$data 			= array(
+			'type'			=> 'regular',
+			'recipients' 	=> array( 'list_id' => $list_id ),
+			'settings'		=> array( 'subject_line' => $subject, 'title' => $title, 'reply_to' => $admin_email, 'from_name' => get_option( 'blogname' ) )
+		);
+		$res = $this->_post( 'campaigns', array(
+			'body' =>  $data
+		) );
+		if ( ! is_wp_error( $res ) ) {
+			return $res->id;
+		} else {
+			return false;
+		}
+	}
 
+	/**
+	 * Update campaign with content
+	 * 
+	 * @since 1.0.0
+	 * 
+	 * @return bool
+	 */
+	public function update_campaign( $id, $list_id, $content ) {
+		$data 			= array(
+			'html'			=> $content,
+			'recipients' 	=> array( 'list_id' => $list_id ),
+		);
+		$res = $this->_put( 'campaigns/' . $id . '/content', array(
+			'body' =>  $data
+		) );
+		if ( ! is_wp_error( $res ) ) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * Send campaign
+	 */
+	public function send_campaign( $id ) {
+		$res = $this->_post( 'campaigns/' . $id . '/actions/send' );
+		if ( ! is_wp_error( $res ) ) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 }
 ?>

@@ -48,13 +48,13 @@ class WCMCPROD_Core_Settings {
     public $email_list;
 
     /**
-     * Mailchimp Campaign ID
+     * Mailchimp Campaign IDs
      * 
      * @since 1.0.0
      * 
-     * @var string
+     * @var array
      */
-    public $campaign_id;
+    public $campaign = array();
 
     /**
      * Schedule to send out the email
@@ -167,7 +167,7 @@ class WCMCPROD_Core_Settings {
 			'api_key'           => $this->api_key,
 			'data_center'       => $this->data_center,
             'email_list'        => $this->email_list,
-            'campaign_id'       => $this->campaign_id,
+            'campaign'       	=> $this->campaign,
             'schedule'          => $this->schedule,
             'email_template'    => $this->email_template,
             'last_sent'         => $this->last_sent
@@ -186,6 +186,10 @@ class WCMCPROD_Core_Settings {
 
 	/**
 	 * Get Schedule
+	 * 
+	 * @since 1.0.0
+	 * 
+	 * @return string
 	 */
 	public function get_schedule( $key, $default = '' ) {
 		if ( isset( $this->schedule[ $key ] ) ) {
@@ -195,7 +199,24 @@ class WCMCPROD_Core_Settings {
 	}
 
 	/**
+	 * Set Schedule
+	 * 
+	 * @since 1.0.0
+	 * 
+	 */
+	public function set_schedule( $key, $value = '' ) {
+		if ( !is_array( $this->schedule ) ) {
+			$this->schedule = array();
+		}
+		$this->schedule[ $key ] = $value;
+	}
+
+	/**
 	 * Get last sent
+	 * 
+	 * @since 1.0.0
+	 * 
+	 * @return string
 	 */
 	public function get_last_sent( $key, $default = '' ) {
 		if ( isset( $this->last_sent[ $key ] ) ) {
@@ -204,6 +225,53 @@ class WCMCPROD_Core_Settings {
 		return $default;
 	}
 
+	/**
+	 * Set last sent
+	 * 
+	 * @since 1.0.0
+	 * 
+	 */
+	public function set_last_sent( $key, $value = '' ) {
+		if ( !is_array( $this->last_sent ) ) {
+			$this->last_sent = array();
+		}
+		$this->last_sent[ $key ] = $value;
+	}
+
+	/**
+	 * Get campaign
+	 * 
+	 * @since 1.0.0
+	 * 
+	 * @return string
+	 */
+	public function get_campaign( $key, $default = '' ) {
+		if ( !is_array( $this->campaign ) ) {
+			$this->campaign = array();
+		}
+		if ( isset( $this->campaign[ $key ] ) ) {
+			return $this->campaign[ $key ];
+		}
+		return $default;
+	}
+
+	/**
+	 * Set campaign
+	 * 
+	 * @since 1.0.0
+	 * 
+	 */
+	public function set_campaign( $key, $value = '' ) {
+		$this->campaign[ $key ] = $value;
+	}
+
+	/**
+	 * Get message. If message is not set return default
+	 * 
+	 * @since 1.0.0
+	 * 
+	 * @return string
+	 */
 	public function get_message() {
 		if ( empty( $this->email_template ) ) {
 			return "
