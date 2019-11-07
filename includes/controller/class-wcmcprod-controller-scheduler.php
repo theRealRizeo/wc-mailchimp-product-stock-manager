@@ -85,7 +85,7 @@ class WCMCPROD_Controller_Scheduler {
 			}
 			if ( $is_send ) {
 				$products 	= $this->get_products( 'in_stock', __( 'In Stock', 'wc-mc-product-stock-manager' ) );
-				$to_send 	= $this->replace_content( __( 'In Stock', 'wc-mc-product-stock-manager' ), $products, $settings->email_template );
+				$to_send 	= $this->replace_content( __( 'In Stock', 'wc-mc-product-stock-manager' ), $products, $settings->get_message() );
 
 				$updated 	= $api->update_campaign( $in_stock, $to_send );
 				if ( $updated ) {
@@ -116,7 +116,7 @@ class WCMCPROD_Controller_Scheduler {
 			}
 			if ( $is_send ) {
 				$products 	= $this->get_products( 'out_of_stock', __( 'Out Of Stock', 'wc-mc-product-stock-manager' ) );
-				$to_send 	= $this->replace_content( __( 'Out Of Stock', 'wc-mc-product-stock-manager' ), $products, $settings->email_template );
+				$to_send 	= $this->replace_content( __( 'Out Of Stock', 'wc-mc-product-stock-manager' ), $products, $settings->get_message() );
 
 				$updated 	= $api->update_campaign( $ouf_of_stock, $to_send );
 				if ( $updated ) {
