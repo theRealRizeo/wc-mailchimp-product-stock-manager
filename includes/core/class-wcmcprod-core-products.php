@@ -17,6 +17,22 @@ class WCMCPROD_Core_Products {
 
     public function __construct() {
         $this->table_name = WCMCPROD_Core_Database::get_table_name( WCMCPROD_Core_Database::PRODUCTS );
+	}
+	
+	/**
+     * Get products by status
+     * 
+     * @param string $status - in_stock or out_of_stock
+     * 
+     * @since 1.0.0
+     * 
+     * @return array
+     */
+    public function get_all_products( $status ) {
+        global $wpdb;
+        $sql        = "SELECT `id`, `product_id`, `product_name`, `product_url` FROM {$this->table_name} WHERE `status` = %s";
+        $products   = $wpdb->get_results( $wpdb->prepare( $sql, $status ) );
+        return $products;
     }
 
     /**
@@ -26,7 +42,7 @@ class WCMCPROD_Core_Products {
      * 
      * @since 1.0.0
      * 
-     * @return string
+     * @return array
      */
     public function get_products( $status ) {
         global $wpdb;
@@ -46,6 +62,20 @@ class WCMCPROD_Core_Products {
         global $wpdb;
         $str = implode( ",", $ids );
         $sql = "UPDATE {$this->table_name} SET `processed` = 'sent' WHERE `id` IN( $str )";
+        $wpdb->query( $sql );
+	}
+	
+	/**
+     * ids to deleted
+     * 
+     * @param array $ids 
+     * 
+     * @since 1.0.0
+     */
+    public function delete_products( $ids = array() ) {
+        global $wpdb;
+        $str = implode( ",", $ids );
+        $sql = "DELETE FROM {$this->table_name} WHERE `id` IN( $str )";
         $wpdb->query( $sql );
     }
 
@@ -99,6 +129,15 @@ class WCMCPROD_Core_Products {
 			'processed'    	=> 'pending',
 			'date_updated'  => date_i18n( 'Y-m-d H:i:s' )
 		), array( 'id' => $id ) );
+	}
+
+	/**
+	 * Delete product
+	 */
+	public function delete_product( $id ) {
+		global $wpdb;
+		$sql = "DELETE FROM {$this->table_name} WHERE `id` = %d";
+		$wpdb->query( $wpdb->prepare( $sql, $id ) );
 	}
 }
 ?>

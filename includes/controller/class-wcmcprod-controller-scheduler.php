@@ -51,7 +51,9 @@ class WCMCPROD_Controller_Scheduler {
 
 	public function maybe_send_export( $force = false ) {
 		$settings = new WCMCPROD_Core_Settings();
-		if ( $settings->enabled ) {
+		if ( $settings->enabled && $settings->api_key && $settings->email_list ) {
+			$list_id 			= $settings->email_list;
+			$api 				= new WCMCPROD_Core_Mailchimp( $settings->api_key, $settings->data_center );
 			$schedule 			= $settings->schedule; //The time of the day
 			$ouf_of_stock 		= $settings->get_schedule( 'ouf_of_stock', 18 );
 			$in_stock 			= $settings->get_schedule( 'in_stock', 18 );
@@ -75,8 +77,18 @@ class WCMCPROD_Controller_Scheduler {
 			if ( empty( $in_stock ) ) {
 				$is_send = false;
 			}
+			$content = $settings->email_template;
 			if ( $is_send ) {
-				$settings->set_last_sent( 'in_stock', current_time( 'timestamp' ) );
+				$products 	= $this->get_products( 'in_stock', __( 'In Stock', 'wc-mc-product-stock-manager' ) );
+				$to_send 	= $this->replace_content( __( 'In Stock', 'wc-mc-product-stock-manager' ), $products, $content );
+
+				$updated 	= $api->update_campaign( $in_stock, $list_id, $to_send );
+				if ( $updated ) {
+					$sent 	= $api->send_campaign( $in_stock );
+					if ( $sent ) {
+						$settings->set_last_sent( 'in_stock', current_time( 'timestamp' ) );
+					}
+				}
 			}
 
 			$is_send = current_time( 'timestamp' ) > strtotime( $next_sent_oos );
@@ -88,10 +100,31 @@ class WCMCPROD_Controller_Scheduler {
 				$is_send = false;
 			}
 			if ( $is_send ) {
-				$settings->set_last_sent( 'ouf_of_stock', current_time( 'timestamp' ) );
+				$products 	= $this->get_products( 'out_of_stock', __( 'Out Of Stock', 'wc-mc-product-stock-manager' ) );
+				$to_send 	= $this->replace_content( __( 'Out Of Stock', 'wc-mc-product-stock-manager' ), $products, $content );
+
+				$updated 	= $api->update_campaign( $ouf_of_stock, $list_id, $to_send );
+				if ( $updated ) {
+					$sent 	= $api->send_campaign( $ouf_of_stock );
+					if ( $sent ) {
+						$settings->set_last_sent( 'ouf_of_stock', current_time( 'timestamp' ) );
+					}
+				}
+				
 			}
 			$settings->save();
 		}
+	}
+
+	/**
+	 * Replace content with place holders
+	 * 
+	 * @return string
+	 */
+	private function replace_content( $state, $list, $content ) {
+		$find    = array( '{product_state}', '{product_list}' );
+		$replace = array( $state, $list );
+		return str_replace( $find, $replace, $content );
 	}
 
 	/**
@@ -104,12 +137,22 @@ class WCMCPROD_Controller_Scheduler {
 	 * @return string
 	 */
 	private function get_products( $status, $status_text ) {
-		$service = new WCMCPROD_Core_Products();
-		$products = $service->get_products( $status );
+		$service 	= new WCMCPROD_Core_Products();
+		$products 	= $service->get_all_products( $status );
 		if ( is_array( $products ) && !empty( $products ) ) {
-
+			$list 	= "<ul>";
+			$ids 	= array();
+			foreach ( $products as $product ) {
+				$list .= "<li><a href='{$product->product_url}' target='_blank'>{$product->product_name}</a></li>";
+				$ids[] = $product->id;
+			}
+			$list .= "</ul>";
+			if ( $status == 'in_stock' ) {
+				$service->delete_products( $ids );
+			}
+			return $list;
 		} else {
-			return sprintf( __( 'No products found that are %s', 'wc-mc-product-stock-manager' ), $status_text );
+			return sprintf( __( 'No new products found that are %s', 'wc-mc-product-stock-manager' ), $status_text );
 		}
 	}
 }

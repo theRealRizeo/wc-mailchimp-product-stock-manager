@@ -274,7 +274,7 @@ class WCMCPROD_Controller_Settings {
 					$create_or_update = false;
 					if ( !$settings->email_list ) {
 						$settings->email_list 	= $list_id;
-						$create_or_update = true;
+						$create_or_update 		= true;
 					}
 					if ( $settings->email_list !== $list_id ) {
 						$create_or_update = true;
@@ -368,6 +368,11 @@ class WCMCPROD_Controller_Settings {
 				$service->save_product( $product_id, $product->get_name(), $product->get_permalink(), 'out_of_stock' );
 			} else {
 				$service->update_product( $save_id, $product->get_name(), $product->get_permalink(), 'out_of_stock' );
+			}
+		} else if ( $status == 'instock' ) {
+			$save_id = $service->get_product( $product_id );
+			if ( $save_id ) {
+				$service->delete_product( $save_id );
 			}
 		}
 	}
