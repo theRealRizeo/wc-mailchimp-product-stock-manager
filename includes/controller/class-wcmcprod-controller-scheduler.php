@@ -148,7 +148,9 @@ class WCMCPROD_Controller_Scheduler {
 			$list 	= "<ul>";
 			$ids 	= array();
 			foreach ( $products as $product ) {
-				$list .= "<li><a href='{$product->product_url}' target='_blank'>{$product->product_name}</a></li>";
+				$wc_product = wc_get_product( $product->product_id );
+				$prod_image = ( $wc_product && is_object( $wc_product ) ) ? $wc_product->get_image( 'thumbnail' ) : '';
+				$list .= "<li><a href='{$product->product_url}' target='_blank'>{$prod_image}{$product->product_name}</a></li>";
 				$ids[] = $product->id;
 			}
 			$list .= "</ul>";
