@@ -216,8 +216,7 @@ class WCMCPROD_Controller_Settings {
 										<td>
 											<?php
 												$content 	= $settings->get_message();
-												$settings  = array( 'media_buttons' => false );
-												wp_editor( $content, 'email_content', $settings );
+												wp_editor( $content, 'email_content' );
 											?>
 											<p class="description">
 												<?php echo sprintf( __( 'Use %s and %s to represent the state of the products and the list of the products', 'wc-mc-product-stock-manager' ), '<strong>{product_state}</strong>', '<strong>{product_list}</strong>' ); ?>
