@@ -30,6 +30,24 @@ class WCMCPROD_Core_Settings {
 	public $debug = false;
 
 	/**
+	 * Send empty in stock
+	 * 
+	 * @since 1.0.0
+	 * 
+	 * @var bool
+	 */
+	public $empty_in_stock = true;
+
+	/**
+	 * Send empty out of stock
+	 * 
+	 * @since 1.0.0
+	 * 
+	 * @var bool
+	 */
+	public $empty_oo_stock = true;
+
+	/**
 	 * From email
 	 * 
 	 * @since 1.0.0
@@ -183,6 +201,8 @@ class WCMCPROD_Core_Settings {
 		$settings = array(
 			'enabled'			=> $this->enabled,
 			'debug'				=> $this->debug,
+			'empty_in_stock'	=> $this->empty_in_stock,
+			'empty_oo_stock'	=> $this->empty_oo_stock,
 			'from_email'		=> $this->from_email,
 			'from_name'			=> $this->from_name,
 			'api_key'           => $this->api_key,

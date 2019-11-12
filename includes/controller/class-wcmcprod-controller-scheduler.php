@@ -61,22 +61,24 @@ class WCMCPROD_Controller_Scheduler {
 				$is_send = false;
 			}
 			if ( $is_send ) {
-				$products 	= $this->get_products( 'in_stock', __( 'In Stock', 'wc-mc-product-stock-manager' ) );
-				$to_send 	= $this->replace_content( __( 'In Stock', 'wc-mc-product-stock-manager' ), $products, $settings->get_message() );
+				$products 	= $this->get_products( 'in_stock', __( 'In Stock', 'wc-mc-product-stock-manager' ), $settings->empty_in_stock );
+				if ( $products ) {
+					$to_send 	= $this->replace_content( __( 'In Stock', 'wc-mc-product-stock-manager' ), $products, $settings->get_message() );
 
-				$updated 	= $api->update_campaign( $in_stock, $to_send );
-				if ( $updated ) {
-					$sent 	= $api->send_campaign( $in_stock );
-					if ( $sent && !$force ) {
-						
+					$updated 	= $api->update_campaign( $in_stock, $to_send );
+					if ( $updated ) {
+						$sent 	= $api->send_campaign( $in_stock );
+						if ( $sent && !$force ) {
+							
+						} else {
+							if ( !$sent && $force ) {
+								$sent_forced = false;
+							}
+						}
 					} else {
-						if ( !$sent && $force ) {
+						if ( $force ) {
 							$sent_forced = false;
 						}
-					}
-				} else {
-					if ( $force ) {
-						$sent_forced = false;
 					}
 				}
 				//$api->delete_campaign( $in_stock );
@@ -92,28 +94,29 @@ class WCMCPROD_Controller_Scheduler {
 				$is_send = false;
 			}
 			if ( $is_send ) {
-				$products 	= $this->get_products( 'out_of_stock', __( 'Out Of Stock', 'wc-mc-product-stock-manager' ) );
-				$to_send 	= $this->replace_content( __( 'Out Of Stock', 'wc-mc-product-stock-manager' ), $products, $settings->get_message() );
+				$products 	= $this->get_products( 'out_of_stock', __( 'Out Of Stock', 'wc-mc-product-stock-manager' ), $settings->empty_oo_stock );
+				if ( $products ) {
+					$to_send 	= $this->replace_content( __( 'Out Of Stock', 'wc-mc-product-stock-manager' ), $products, $settings->get_message() );
 
-				$updated 	= $api->update_campaign( $ouf_of_stock, $to_send );
-				if ( $updated ) {
-					$sent 	= $api->send_campaign( $ouf_of_stock );
-					if ( $sent && !$force ) {
-						
-					} else {
-						if ( !$sent && $force ) {
+					$updated 	= $api->update_campaign( $ouf_of_stock, $to_send );
+					if ( $updated ) {
+						$sent 	= $api->send_campaign( $ouf_of_stock );
+						if ( $sent && !$force ) {
+							
+						} else {
+							if ( !$sent && $force ) {
+								$sent_forced = false;
+							}
+						}
+					}  else {
+						if ( $force ) {
 							$sent_forced = false;
 						}
-					}
-				}  else {
-					if ( $force ) {
-						$sent_forced = false;
 					}
 				}
 				//$api->delete_campaign( $ouf_of_stock );
 				
 			}
-			$settings->save();
 
 			if ( $force && !$sent_forced ) {
 				wp_send_json_error( __( 'Error sending test email', 'wc-mc-product-stock-manager' ) );
@@ -141,7 +144,7 @@ class WCMCPROD_Controller_Scheduler {
 	 * 
 	 * @return string
 	 */
-	private function get_products( $status, $status_text ) {
+	private function get_products( $status, $status_text, $send ) {
 		$service 	= new WCMCPROD_Core_Products();
 		$products 	= $service->get_all_products( $status );
 		if ( is_array( $products ) && !empty( $products ) ) {
@@ -159,7 +162,11 @@ class WCMCPROD_Controller_Scheduler {
 			}
 			return $list;
 		} else {
-			return sprintf( __( 'No new products found that are %s', 'wc-mc-product-stock-manager' ), $status_text );
+			if ( $send ) {
+				return sprintf( __( 'No new products found that are %s', 'wc-mc-product-stock-manager' ), $status_text );
+			} else {
+				return false;
+			}
 		}
 	}
 }

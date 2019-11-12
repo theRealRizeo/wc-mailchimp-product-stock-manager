@@ -137,6 +137,32 @@ class WCMCPROD_Controller_Settings {
 							</td>
 						</tr>
 						<tr>
+							<th scope="row"><?php _e( 'Send email when there are no products out of stock', 'wc-mc-product-stock-manager' ); ?></th>
+							<td>
+								<fieldset>
+									<legend class="screen-reader-text">
+										<span><?php _e( 'Send email when there are no products out of stock', 'wc-mc-product-stock-manager' ); ?></span>
+									</legend>
+									<label for="empty_oo_stock">
+										<input name="empty_oo_stock" type="checkbox" id="empty_oo_stock" value="1" <?php checked( $settings->empty_oo_stock, 1 ); ?> />
+									</label>
+								</fieldset>
+							</td>
+						</tr>
+						<tr>
+							<th scope="row"><?php _e( 'Send email when there are no products that have just come in stock', 'wc-mc-product-stock-manager' ); ?></th>
+							<td>
+								<fieldset>
+									<legend class="screen-reader-text">
+										<span><?php _e( 'Send email when there are no products that have just come in stock', 'wc-mc-product-stock-manager' ); ?></span>
+									</legend>
+									<label for="empty_in_stock">
+										<input name="empty_in_stock" type="checkbox" id="empty_in_stock" value="1" <?php checked( $settings->empty_in_stock, 1 ); ?> />
+									</label>
+								</fieldset>
+							</td>
+						</tr>
+						<tr>
 							<th scope="row">
 								<label for="api_key"><?php _e( 'MailChimp API Key', 'wc-mc-product-stock-manager' ); ?></label>
 							</th>
@@ -294,6 +320,8 @@ class WCMCPROD_Controller_Settings {
 			$data_center 	= end( $exploded );
 			$enabled		= isset( $_POST['enabled'] );
 			$debug			= isset( $_POST['debug'] );
+			$empty_in_stock	= isset( $_POST['empty_in_stock'] );
+			$empty_oo_stock	= isset( $_POST['empty_oo_stock'] );
 			$list_id		= isset( $_POST['list_id'] ) ? sanitize_text_field( $_POST['list_id'] ) : '';
 			$content 		= isset( $_POST['email_content'] ) ? wp_kses_post( $_POST['email_content'] ) : '';
 
@@ -318,8 +346,10 @@ class WCMCPROD_Controller_Settings {
 					}
 				}
 			}
-			$settings->enabled 	= $enabled;
-			$settings->debug	= $debug;
+			$settings->enabled 			= $enabled;
+			$settings->debug			= $debug;
+			$settings->empty_in_stock	= $empty_in_stock;
+			$settings->empty_oo_stock	= $empty_oo_stock;
 			$settings->save();
 
 			$url = add_query_arg( 'success', 'true', $url );
