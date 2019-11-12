@@ -148,15 +148,20 @@ class WCMCPROD_Controller_Scheduler {
 		$service 	= new WCMCPROD_Core_Products();
 		$products 	= $service->get_all_products( $status );
 		if ( is_array( $products ) && !empty( $products ) ) {
-			$list 	= "<ul>";
+			$list 	= "<div>";
 			$ids 	= array();
 			foreach ( $products as $product ) {
 				$wc_product = wc_get_product( $product->product_id );
-				$prod_image = ( $wc_product && is_object( $wc_product ) ) ? $wc_product->get_image( 'thumbnail' ) : '';
-				$list .= "<li><a href='{$product->product_url}' target='_blank'>{$prod_image}{$product->product_name}</a></li>";
+				$prod_image = ( $wc_product && is_object( $wc_product ) ) ? $wc_product->get_image( 'woocommerce_single' ) : false;
+				$list .= "<div style='vertical-align: top; text-align: center; width: auto; margin-left:auto; margin-right:auto; margin-bottom:20px;'>";
+				if ( $prod_image ) {
+					$list .= $prod_image;
+				}
+				$list .= "<span style='display: block; color: #b11f24; text-align:center;'><a href='{$product->product_url}' target='_blank'>{$product->product_name}</a></span>";
+				$list .= "</div>";
 				$ids[] = $product->id;
 			}
-			$list .= "</ul>";
+			$list .= "</div>";
 			if ( $status == 'in_stock' ) {
 				$service->delete_products( $ids );
 			}
