@@ -152,12 +152,12 @@ class WCMCPROD_Controller_Scheduler {
 			$ids 	= array();
 			foreach ( $products as $product ) {
 				$wc_product = wc_get_product( $product->product_id );
-				$prod_image = ( $wc_product && is_object( $wc_product ) ) ? $wc_product->get_image( 'woocommerce_single' ) : false;
+				$prod_image = ( $wc_product && is_object( $wc_product ) ) ? $wc_product->get_image( 'thumbnail' ) : false;
 				$list .= "<div style='vertical-align: top; text-align: center; width: auto; margin-left:auto; margin-right:auto; margin-bottom:20px;'>";
 				if ( $prod_image ) {
 					$list .= $prod_image;
 				}
-				$list .= "<span style='display: block; color: #b11f24; text-align:center;'><a href='{$product->product_url}' target='_blank'>{$product->product_name}</a></span>";
+				$list .= "<center><span style='display: block; color: #b11f24; text-align:center;'><a href='{$product->product_url}' target='_blank'>{$product->product_name}</a></span></center>";
 				$list .= "</div>";
 				$ids[] = $product->id;
 			}
